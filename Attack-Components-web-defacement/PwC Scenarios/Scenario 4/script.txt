@@ -1,0 +1,7 @@
+scenario 4
+
+stage2: nmap.txt ? fingerprint ? //
+
+stage3: ftp.py
+
+stage4: dos.txt

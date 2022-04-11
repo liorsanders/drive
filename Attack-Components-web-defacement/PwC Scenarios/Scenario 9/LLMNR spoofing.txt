@@ -1,0 +1,5 @@
+run git clone 
+https://github.com/SpiderLabs/Responder
+cd Responder
+sudo python Responder.py -I <eth0 - wiresd / wlan0 - wifi> -wF -v > hash.txt 
+// ? what if its windows

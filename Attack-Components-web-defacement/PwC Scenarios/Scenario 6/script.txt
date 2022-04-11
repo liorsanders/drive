@@ -1,0 +1,8 @@
+scenario 6
+
+stage1: neet to do something ?
+
+stage2: arp spoofing.txt
+
+stage3: MITM just send over the recorded data // todo ? hot to record the data ".exe > .txt"
+overflow with the recorded data just faster

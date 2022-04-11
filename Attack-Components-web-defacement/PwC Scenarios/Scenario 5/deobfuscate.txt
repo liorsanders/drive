@@ -1,0 +1,5 @@
+tried to one line it like mimikatz but i didnt make it
+clone: https://github.com/danielbohannon/Invoke-Obfuscation
+then run:
+Import-Module ./Invoke-Obfuscation.psd1; Invoke-Obfuscation
+// to complite

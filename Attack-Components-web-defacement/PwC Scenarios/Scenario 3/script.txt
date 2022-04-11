@@ -1,0 +1,13 @@
+scenario 3
+
+stage2: add to task scheduler.txt
+
+stage3: mimikatz.txt
+
+stage4: nmap.txt
+
+stage5: disable task manager.py
+
+stage6: ransomwere.txt ?
+
+stage7: // todo HMI api

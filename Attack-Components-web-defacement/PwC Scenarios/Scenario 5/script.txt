@@ -1,0 +1,18 @@
+scenario 5
+
+stage1: my job put file in server?
+ftp.py 
+
+stage2: reverse shell.txt
+
+stage3: add serviece.py
+// todo give serviece sys permitions
+nmap.txt
+// find db ?? how
+
+stage4: deobfuscate.txt ?
+
+stage5: smb.py // need API
+
+stage6: // todo HMI api
+

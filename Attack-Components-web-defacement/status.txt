@@ -1,0 +1,8 @@
+scripts list:
+
+Deobfuscate => should work 5, 4
+vnc 9, 5 => didnt seccsid to sut up and running script
+
+give service system permitions => need help 
+
+all HMI API stuff => need to get api

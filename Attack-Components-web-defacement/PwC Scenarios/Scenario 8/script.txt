@@ -1,0 +1,8 @@
+scenario 8
+
+stage1: ?? i need to do this ?
+
+// stage 1 to 6 ?
+
+stage6: // todo need HMI api
+

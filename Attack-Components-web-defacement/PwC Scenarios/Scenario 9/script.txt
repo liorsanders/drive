@@ -1,0 +1,19 @@
+scenario 9
+
+stage2: reverse shell.txt
+
+stage3: namp.txt
+LLMNR poisoning // todo finish
+// ? ftp to c&c server 
+ftp.py
+hash brut force.py //
+
+stage4:
+// idk what is that - take from scenario 1
+disable task manager.py
+
+stage5:
+// todo vnc i didnt find cli/script for vnc
+screenshot.txt
+
+stage6: todo need HMI api

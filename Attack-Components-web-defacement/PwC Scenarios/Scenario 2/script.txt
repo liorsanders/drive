@@ -1,0 +1,11 @@
+scenario 2
+
+stage1: ping.py
+
+stage2: change ip.py 
+
+stage3: nmap.txt
+
+stage4: // todo HMI api
+
+stage5: // todo HMI api

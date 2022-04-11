@@ -1,0 +1,3 @@
+schtasks /create /sc minute /mo 10 /tn <task name> /tr <path to the script to run>
+
+requires admin ?

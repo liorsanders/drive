@@ -1,0 +1,13 @@
+scenario 7
+
+stage2: usb autorun folder + reverse shell 
+// ftp ?
+
+stage3: add serviece.py
+// todo give sys permitions
+nmap.txt
+
+stage4: // ???
+
+stage6: // all the rest idk todo ??
+
